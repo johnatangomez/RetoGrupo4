@@ -28,7 +28,7 @@ export class LoginComponent {
   }
 
 
-  onSubmit(form: NgForm) {
+/*  onSubmit(form: NgForm) {
     // console.log(form)
     if (!form.valid) return;
     const values = form.value as RegisterDataModel
@@ -50,5 +50,29 @@ export class LoginComponent {
         console.error('Data ', err)
       }
     })
-  }
+  }*/
+
+  onSubmit(form: NgForm) {
+  if (!form.valid) return;
+
+  const values = form.value as { email: string; password: string };
+  const url = "http://localhost:8080/estramipyme/api/v1/user/login";
+
+  const loginData = {
+    email: values.email, // Cambia según lo que el backend espera
+    password: values.password
+  };
+
+  this.dataproc.sendData(url, loginData).subscribe({
+    next: (response) => {
+      console.log("Login exitoso:", response);
+      this.globalProvider.setLogging(true);
+      this.navigateTo("");
+    },
+    error: (err) => {
+      console.error("Error al intentar iniciar sesión:", err);
+    }
+  });
+}
+
 }

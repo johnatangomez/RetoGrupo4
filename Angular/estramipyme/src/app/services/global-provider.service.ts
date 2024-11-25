@@ -52,7 +52,8 @@ export class GlobalProviderService {
   });
 
   constructor() {
-    this.dataProc.getItems('http://localhost:3000/questions').subscribe({
+    //this.dataProc.getItems('http://localhost:3000/questions').subscribe({
+    this.dataProc.getItems('http://localhost:8080/estramipyme/api/v1/question/all').subscribe({  
       next: (questions) => {
         this.numberOfQuestions = questions.length; //Obtener los ids
         this.cliente = questions

@@ -10,8 +10,13 @@ import {SectorOption} from "@models/sector.model";
 export class DataProcService {
   private http = inject(HttpClient);
 
-  getItems(url: string) {
+  /*getItems(url: string) {
     return this.http.get <Question[]>(url)
+  }*/
+
+  getItems(url: string): Observable<Question[]> {
+    console.log('Solicitando datos a la URL:', url); // Verifica que el método se llame correctamente
+    return this.http.get<Question[]>(url);
   }
 
   sendData(url: string, data: any) {

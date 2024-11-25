@@ -50,11 +50,11 @@ export class RegisterComponent {
   }
 
 
-  onSubmit(form: NgForm) {
+/*  onSubmit(form: NgForm) {
     console.log("valores del form")
     console.log(form.value)
     if (!form.valid) return;
-    const url = "http://localhost:3000/users"
+    const url = "http://localhost:8080/estramipyme/api/v1/user/register"
     const values = form.value as RegisterDataModel
     if (values.password !== values.confirmPassword) {
       this.passwordDoNotMatch.set(true);
@@ -78,5 +78,50 @@ export class RegisterComponent {
         console.error(err)
       }
     })
+  }*/
+
+  onSubmit(form: NgForm) {
+    console.log("Valores del formulario:");
+    console.log(form.value);
+  
+    if (!form.valid) {
+      console.error("Formulario inválido");
+      return;
+    }
+  
+    const url = "http://localhost:8080/estramipyme/api/v1/user/register";
+    const formValues = form.value;
+  
+    // Valida que las contraseñas coincidan
+    if (formValues.password !== formValues.confirmPassword) {
+      this.passwordDoNotMatch.set(true);
+      return;
+    }
+  
+    // Mapea los valores del formulario al formato esperado por el backend
+    const requestData = {
+      businessname: formValues.businessName, // Cambia a la clave esperada por el backend
+      persontype: formValues.personType,
+      doctype: formValues.docType,
+      docnumber: formValues.docNumber,
+      password: formValues.password, // Incluye otros valores según el endpoint
+      email: formValues.email,
+      sector: formValues.sector,
+      surname: formValues.surname
+    };
+  
+    console.log("Datos a enviar:");
+    console.log(requestData);
+  
+    // Enviar datos al backend
+    this.dataproc.sendData(url, requestData).subscribe({
+      next: (response) => {
+        console.log("Datos enviados con éxito:", response);
+        this.navigateTo(''); // Navega a la ruta deseada tras éxito
+      },
+      error: (err) => {
+        console.error("Error al enviar los datos:", err);
+      }
+    });
   }
 }

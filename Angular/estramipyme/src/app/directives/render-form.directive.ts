@@ -1,7 +1,9 @@
-import {Directive, inject, ElementRef, signal, Input} from '@angular/core';
+/*import {Directive, inject, ElementRef, signal, Input} from '@angular/core';
 import {DataProcService} from "@services/data-proc.service";
 import {Question} from "@models/question.model";
 import {GlobalProviderService} from "@services/global-provider.service";
+
+
 
 @Directive({
   selector: '[appRenderForm]',
@@ -48,6 +50,8 @@ export class RenderFormDirective {
       if (progress === 0) this.element.nativeElement.querySelector('.form--1').reset()
     })
   }
+
+  
 
   _createForm(data: Question[], id: String | number) {
     const form = this._createFormElement(data, id);
@@ -106,5 +110,86 @@ export class RenderFormDirective {
         }
       }
     }
+  }
+}*/
+
+import { Directive, inject, ElementRef, signal, Input } from '@angular/core';
+import { DataProcService } from "@services/data-proc.service";
+import { Question } from "@models/question.model";
+
+@Directive({
+  selector: '[appRenderForm]',
+  standalone: true
+})
+export class RenderFormDirective {
+  element = inject(ElementRef);
+  questions = signal<Question[]>([]);
+  @Input({ required: true }) url!: string;
+
+  private dataProc = inject(DataProcService);
+
+  ngOnInit() {
+    // Llamar al servicio para obtener las preguntas
+    console.log('Directiva inicializada con URL:', this.url);
+    this.dataProc.getItems(this.url).subscribe({
+      next: (questions) => {
+        console.log('Preguntas obtenidas:', questions)
+        this.questions.set(questions);
+        this._createForm(questions, 1);
+
+        // Agregar listener para manejar entradas del formulario
+        this.element.nativeElement.querySelector('.form--1').addEventListener('input', (e: Event) => {
+          const target = e.target as HTMLInputElement;
+          console.log(`Pregunta ${target.name}: Opción seleccionada: ${target.value}`);
+        });
+      },
+      error: (err) => {
+        console.error("Error al obtener las preguntas:", err);
+      }
+    });
+  }
+
+  // Crear el formulario principal
+  _createForm(data: Question[], id: string | number) {
+    const form = this._createFormElement(data, id);
+    const formContainer = this.element.nativeElement as HTMLElement;
+    formContainer.append(form);
+  }
+
+  // Crear el elemento formulario dinámico
+  _createFormElement(data: Question[], id: string | number) {
+    const formElement = document.createElement("form");
+    formElement.classList.add(`form--${id}`);
+    data.forEach((q: Question) => {
+      const fieldset = document.createElement("fieldset");
+      fieldset.classList.add("questions");
+      fieldset.classList.add(`question--${q.id}`);
+      fieldset.setAttribute("data-question-id", String(q.id));
+
+      const legend = document.createElement("legend");
+      legend.textContent = q.question;
+      fieldset.append(legend);
+
+      q.options.forEach((op: string, index: number) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+
+        input.setAttribute("type", "radio");
+        input.setAttribute("name", `Q${q.id}`);
+        input.setAttribute("value", String(index + 1));
+
+        label.innerHTML = `
+          <input type="radio" name="Q${q.id}" value=${
+          index + 1
+        } class="radioinput radioinput__section--${id}" data-id="${q.id}-${
+          index + 1
+        }">${op}
+        `;
+        fieldset.append(label);
+      });
+
+      formElement.append(fieldset);
+    });
+    return formElement;
   }
 }
